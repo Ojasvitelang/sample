@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kalyan Jewellers</title>
+    <style>
+        /* Set a background image for the entire page */
+        body {
+            font-family: Arial, sans-serif;
+            background-image: url('background-image.jpg'); /* Ensure this path matches your directory structure */
+            background-size: cover;
+            background-position: center;
+            padding: 20px;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        .container {
+            background-color: rgba(255, 255, 255, 0.85); /* Semi-transparent white background */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+            margin: 20px auto;
+            text-align: center;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 28px;
+        }
+
+        label {
+            display: block;
+            margin: 15px 0 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="number"], input[type="date"], input[type="text"], input[type="password"], button {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        button {
+            background-color: #28a745;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+            border: none;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #218838;
+        }
+
+        .footer-text {
+            font-size: 14px;
+            color: #333;
+            margin-top: 15px;
+        }
+
+        .footer-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+
+        .footer-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Hide the container elements initially */
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Login Page (Initially Visible) -->
+    <div class="container" id="login-page">
+        <h1>Login to Kalyan Jewellers</h1>
+        <label for="username">Username:</label>
+        <input type="text" id="username" required>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" required>
+
+        <button onclick="login()">Login</button>
+        <p class="footer-text">For user/buyer purpose, <a href="https://kalyanjewellers.net" class="footer-link">click here</a>.</p>
+    </div>
+
+    <!-- Data Entry Form (Initially Hidden) -->
+    <div class="container hidden" id="main-page">
+        <h1>Weekly Profit Calculation</h1>
+
+        <form id="calculationForm" action="results.php" method="post">
+            <label for="start_date">Start Date of the Week:</label>
+            <input type="date" id="start_date" name="start_date" required>
+
+            <label for="end_date">End Date of the Week:</label>
+            <input type="date" id="end_date" name="end_date" required>
+
+            <label for="startingReserve">Starting reserve of gold (grams):</label>
+            <input type="number" id="startingReserve" name="starting_reserve" required>
+
+            <label for="goldBought">Gold bought during the week (grams):</label>
+            <input type="number" id="goldBought" name="gold_bought" required>
+
+            <label for="rings">Number of rings sold:</label>
+            <input type="number" id="rings" name="rings_sold" required>
+
+            <label for="pendants">Number of pendants sold:</label>
+            <input type="number" id="pendants" name="pendants_sold" required>
+
+            <label for="chains">Number of chains sold:</label>
+            <input type="number" id="chains" name="chains_sold" required>
+
+            <label for="makingCharges">Making charges per item (INR):</label>
+            <input type="number" id="makingCharges" name="making_charges" required>
+
+            <label for="salaryCost">Salary cost (INR):</label>
+            <input type="number" id="salaryCost" name="salary_cost" required>
+
+            <label for="marketingCost">Marketing and sales cost (INR):</label>
+            <input type="number" id="marketingCost" name="marketing_cost" required>
+
+            <label for="itCost">IT cost (INR):</label>
+            <input type="number" id="itCost" name="it_cost" required>
+
+            <label for="rentalCost">Rental cost (INR):</label>
+            <input type="number" id="rentalCost" name="rental_cost" required>
+
+            <label for="electricityCost">Electricity and misc cost (INR):</label>
+            <input type="number" id="electricityCost" name="electricity_cost" required>
+
+            <!-- Displaying the gold price -->
+            <label for="goldPrice">Gold price per gram (INR):</label>
+            <input type="number" id="goldPrice" name="gold_price" readonly required>
+
+            <!-- Hidden fields for calculated values -->
+            <input type="hidden" id="revenue" name="revenue">
+            <input type="hidden" id="cost_of_gold" name="cost_of_gold">
+            <input type="hidden" id="total_cost" name="total_cost">
+            <input type="hidden" id="net_revenue" name="net_revenue">
+            <input type="hidden" id="profit_before_tax" name="profit_before_tax">
+
+            <button type="button" onclick="calculate()">Calculate</button>
+        </form>
+
+        <div id="result" class="result"></div>
+    </div>
+
+    <!-- JavaScript to handle login and calculations -->
+    <script>
+        // Login function
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+
+            // Predefined credentials
+            const validUsername = "admin";
+            const validPassword = "admin123";
+
+            if (username === validUsername && password === validPassword) {
+                // Hide login page and show main page
+                document.getElementById('login-page').classList.add('hidden');
+                document.getElementById('main-page').classList.remove('hidden');
+                fetchGoldPrice(); // Fetch the gold price on successful login
+            } else {
+                alert("Invalid username or password. Please try again.");
+            }
+        }
+
+        // Fetch and display the live gold price in INR
+        async function fetchGoldPrice() {
+            try {
+                // Fetch the gold price in USD
+                const goldResponse = await fetch('https://www.goldapi.io/api/XAU/USD', {
+                    method: 'GET',
+                    headers: {
+                        'x-access-token': 'goldapi-1qkn6sm0gddsoa-io',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!goldResponse.ok) {
+                    throw new Error('Failed to fetch gold price');
+                }
+
+                const goldData = await goldResponse.json();
+                const goldPricePerGramUSD = goldData.price / 31.1035; // Convert price per troy ounce to price per gram
+
+                // Fetch the USD to INR exchange rate
+                const exchangeRateResponse = await fetch('https://api.exchangerate-api.com/v4/latest/USD');
+
+                if (!exchangeRateResponse.ok) {
+                    throw new Error('Failed to fetch exchange rate');
+                }
+
+                const exchangeRateData = await exchangeRateResponse.json();
+                const usdToInrRate = exchangeRateData.rates.INR;
+
+                // Convert gold price to INR
+                const goldPricePerGramINR = goldPricePerGramUSD * usdToInrRate;
+                document.getElementById('goldPrice').value = goldPricePerGramINR.toFixed(2);
+            } catch (error) {
+                alert('Failed to fetch gold price or exchange rate. Please try again later.');
+            }
+        }
+        document.querySelectorAll('input').forEach(input => {
+            input.addEventListener('keydown', function(event) {
+                if (event.key === 'Enter') {
+                    event.preventDefault(); // Prevent default form submission
+                    let formElements = Array.from(document.querySelectorAll('input, select, textarea'));
+                    let currentIndex = formElements.indexOf(event.target);
+                    if (currentIndex >= 0 && currentIndex < formElements.length - 1) {
+                        formElements[currentIndex + 1].focus(); // Move focus to the next input
+                    }
+                }
+            });
+        });
+        
+
+        // Validate inputs
+        function validateInputs() {
+            const inputs = document.querySelectorAll('input[type="number"]');
+            let isValid = true;
+            inputs.forEach(input => {
+                if (input.value === '' || parseFloat(input.value) <= 0) {
+                    isValid = false;
+                }
+            });
+            return isValid;
+        }
+        const form = document.querySelector('form');
+        const input = document.querySelector('input');
+
+        input.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // prevent default behavior
+                form.submit(); // submit the form
+            }
+        });
+
+        // Calculate profit/loss and update hidden fields, then submit form to results.php
+        function calculate() {
+            if (!validateInputs()) {
+                alert('Please fill in all fields with valid numbers.');
+                return;
+            }
+
+            // Fetch values from input fields
+            const goldPrice = parseFloat(document.getElementById('goldPrice').value);
+            const startingReserve = parseFloat(document.getElementById('startingReserve').value);
+            const goldBought = parseFloat(document.getElementById('goldBought').value);
+            const rings = parseInt(document.getElementById('rings').value);
+            const pendants = parseInt(document.getElementById('pendants').value);
+            const chains = parseInt(document.getElementById('chains').value);
+            const makingCharges = parseFloat(document.getElementById('makingCharges').value);
+            const salaryCost = parseFloat(document.getElementById('salaryCost').value);
+            const marketingCost = parseFloat(document.getElementById('marketingCost').value);
+            const itCost = parseFloat(document.getElementById('itCost').value);
+            const rentalCost = parseFloat(document.getElementById('rentalCost').value);
+            const electricityCost = parseFloat(document.getElementById('electricityCost').value);
+
+            // Total gold used for making jewelry
+            const totalGoldUsed = (rings * 2) + (pendants * 1) + (chains * 3); // in grams
+
+            // Total gold available after purchases (including reserve)
+            const totalGoldAvailable = startingReserve + goldBought;
+
+            // Ensure enough gold is available for the items being made
+            if (totalGoldUsed > totalGoldAvailable) {
+                alert('Not enough gold available to make the jewelry.');
+                return;
+            }
+
+            // Cost of gold used in making the jewelry
+            const costOfGoldUsed = totalGoldUsed * goldPrice;
+
+            // Revenue from sales
+            const revenueFromRings = rings * (2 * goldPrice * 1.4 + makingCharges); // 2 grams per ring
+            const revenueFromPendants = pendants * (1 * goldPrice * 1.4 + makingCharges); // 1 gram per pendant
+            const revenueFromChains = chains * (3 * goldPrice * 1.4 + makingCharges); // 3 grams per chain
+            const totalRevenue = revenueFromRings + revenueFromPendants + revenueFromChains;
+
+            // GST calculation
+            const gst = totalRevenue * 0.18;
+            const netRevenue = totalRevenue - gst;
+
+            // Total costs
+            const totalCost = costOfGoldUsed + salaryCost + marketingCost + itCost + rentalCost + electricityCost;
+
+            // Profit before tax
+            const profitBeforeTax = netRevenue - totalCost;
+
+            // Set the hidden fields with calculated values
+            document.getElementById('revenue').value = totalRevenue.toFixed(2);
+            document.getElementById('cost_of_gold').value = costOfGoldUsed.toFixed(2);
+            document.getElementById('total_cost').value = totalCost.toFixed(2);
+            document.getElementById('net_revenue').value = netRevenue.toFixed(2);
+            document.getElementById('profit_before_tax').value = profitBeforeTax.toFixed(2);
+
+            // Submit the form to results.php
+            document.getElementById('calculationForm').submit();
+        }
+
+
+    </script>
+
+</body>
+</html>
+
+
+
+
+
